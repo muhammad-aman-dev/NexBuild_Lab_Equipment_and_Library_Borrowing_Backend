@@ -18,6 +18,7 @@ import returnRoutes from "./routes/returnRoutes.js";
 import maintenanceRoutes from "./routes/maintenanceRoutes.js";
 import staffRoutes from "./routes/staffRoutes.js";
 import dashboardRoutes from "./routes/dashboardRoutes.js";
+import connectDB from "./config/db.js";
 
 const app = express();
 
@@ -43,7 +44,7 @@ const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   limit: 200,
   standardHeaders: true,
-  legacyHeaders: false,
+  legacyHeaders: false,  
 
   message: {
     success: false,
@@ -96,6 +97,17 @@ app.use(
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+
+// Make sure MongoDB is connected before any route runs (needed on Vercel)
+app.use(async (req, res, next) => {
+  try {
+    await connectDB();
+    next();
+  } catch (err) {
+    console.error("[DB] Connection failed:", err.message);
+    res.status(503).json({ success: false, message: "Database unavailable" });
+  }
+});
 
 // ==========================================
 // 4. API ROUTES

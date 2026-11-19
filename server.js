@@ -17,7 +17,7 @@ const startServer = async () => {
   try {
     console.log("[DATABASE] Starting MongoDB connection...");
 
-    await connectDB();
+    await connectDB(); 
 
     console.log("[DATABASE] MongoDB connection function completed");
 
