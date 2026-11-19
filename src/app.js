@@ -18,7 +18,7 @@ import returnRoutes from "./routes/returnRoutes.js";
 import maintenanceRoutes from "./routes/maintenanceRoutes.js";
 import staffRoutes from "./routes/staffRoutes.js";
 import dashboardRoutes from "./routes/dashboardRoutes.js";
-import connectDB from "./config/db.js";
+import connectDB, { describeDbError, getUriInfo } from "./config/db.js";
 
 const app = express();
 
@@ -99,12 +99,31 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 // Make sure MongoDB is connected before any route runs (needed on Vercel)
+// TEMPORARY: open /api/v1/db-check in the browser to see the real DB error
+app.get("/api/v1/db-check", async (req, res) => {
+  try {
+    const m = await connectDB();
+    res.json({
+      success: true,
+      host: m.connection.host,
+      readyState: m.connection.readyState,
+    });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      uriInfo: getUriInfo(process.env.MONGO_URI),
+      error: describeDbError(err),
+    });
+  }
+});
+
+// Make sure MongoDB is connected before any route runs (needed on Vercel)
 app.use(async (req, res, next) => {
   try {
     await connectDB();
     next();
   } catch (err) {
-    console.error("[DB] Connection failed:", err.message);
+    console.error("[DB] Connection failed:", JSON.stringify(describeDbError(err)));
     res.status(503).json({ success: false, message: "Database unavailable" });
   }
 });
