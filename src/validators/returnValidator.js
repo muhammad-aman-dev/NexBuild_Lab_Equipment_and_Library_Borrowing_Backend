@@ -12,4 +12,4 @@ export const returnLoanSchema = z.object({
 
 export const returnLoanIdSchema = z.object({
   id: z.string().regex(/^[0-9a-fA-F]{24}$/, "Invalid loan ID"),
-});
+}); 
