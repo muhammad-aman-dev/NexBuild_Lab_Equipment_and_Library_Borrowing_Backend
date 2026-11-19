@@ -1,3 +1,4 @@
+
 import "dotenv/config";
 import express from "express";
 import cors from "cors";
@@ -30,7 +31,11 @@ const authLimiter = rateLimit({
 
 const app = express();
 
+// Trust Vercel's proxy
+app.set("trust proxy", 1);
+
 app.use(helmet());
+
 app.use(
   cors({
     origin: process.env.CLIENT_URL,
@@ -39,6 +44,7 @@ app.use(
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -59,7 +65,7 @@ app.use("/api/dashboard", dashboardRoutes);
 app.get("/api/v1/health", (req, res) => {
   res.status(200).json({
     success: true,
-    message: "Campus Inventory API is running"
+    message: "Campus Inventory API is running",
   });
 });
 
